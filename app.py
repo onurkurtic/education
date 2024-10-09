@@ -5,7 +5,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder
 
 # Load the dataset from the uploaded Excel file
-df = pd.read_excel('career_data.xlsx')  # Ensure the correct Excel filename
+df = pd.read_excel('career_data.xlsx')
 
 # Clean the dataset by removing newline characters from 'Job profession'
 df['Job profession'] = df['Job profession'].str.replace('\n', '')
@@ -17,16 +17,35 @@ features = ['Linguistic', 'Musical', 'Bodily', 'Logical - Mathematical',
 # Ensure the feature columns are numeric, and handle any non-numeric values by filling with 0
 df[features] = df[features].apply(pd.to_numeric, errors='coerce').fillna(0)
 
-X = df[features]  # Feature set (skills)
-y = df['Job profession']  # Target variable (job professions)
+X = df[features]  # Feature set
+y = df['Job profession']  # Target variable
 
 # Label encode the target variable (Job Profession)
 le = LabelEncoder()
 y_encoded = le.fit_transform(y)
 
+# Debugging: Check the types and shapes of X and y_encoded
+st.write("Feature matrix (X) preview:")
+st.write(X.head())
+st.write("Feature matrix (X) type:", type(X))
+st.write("Feature matrix (X) shape:", X.shape)
+
+st.write("Target variable (y) preview:")
+st.write(y.head())
+st.write("Target variable (y_encoded) type:", type(y_encoded))
+st.write("Target variable (y_encoded) shape:", y_encoded.shape)
+
+# Convert feature matrix and target to numpy arrays
+X = X.to_numpy()
+y_encoded = np.array(y_encoded)
+
 # Train the Logistic Regression model
 model = LogisticRegression()
-model.fit(X, y_encoded)
+
+try:
+    model.fit(X, y_encoded)
+except Exception as e:
+    st.write(f"Error during model training: {str(e)}")
 
 # Streamlit interface
 st.title("Career Path Guidance AI")
@@ -42,7 +61,9 @@ user_input_df = pd.DataFrame([user_input])
 
 # Process input and predict career path
 if st.button('Predict Career Path'):
-    prediction = model.predict(user_input_df)
-    predicted_job = le.inverse_transform(prediction)
-
-    st.write(f"Based on your skills, a suitable career path for you might be: {predicted_job[0]}")
+    try:
+        prediction = model.predict(user_input_df)
+        predicted_job = le.inverse_transform(prediction)
+        st.write(f"Based on your skills, a suitable career path for you might be: {predicted_job[0]}")
+    except Exception as e:
+        st.write(f"Error during prediction: {str(e)}")
