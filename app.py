@@ -17,8 +17,8 @@ features = ['Linguistic', 'Musical', 'Bodily', 'Logical - Mathematical',
 # Ensure the feature columns are numeric, and handle any non-numeric values by filling with 0
 df[features] = df[features].apply(pd.to_numeric, errors='coerce').fillna(0)
 
-X = df[features]  # Feature set
-y = df['Job profession']  # Target variable
+X = df[features]  # Feature set (skills)
+y = df['Job profession']  # Target variable (job professions)
 
 # Label encode the target variable (Job Profession)
 le = LabelEncoder()
