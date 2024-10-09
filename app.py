@@ -5,16 +5,20 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder
 
 # Load the dataset from the uploaded Excel file
-df = pd.read_excel('career_data.xlsx')  # Updated with the new file name
+df = pd.read_excel('career_data.xlsx')  # Ensure the correct Excel filename
 
 # Clean the dataset by removing newline characters from 'Job profession'
 df['Job profession'] = df['Job profession'].str.replace('\n', '')
 
-# Select relevant feature columns and the target column
+# Select relevant feature columns and ensure they are numeric
 features = ['Linguistic', 'Musical', 'Bodily', 'Logical - Mathematical', 
             'Spatial-Visualization', 'Interpersonal', 'Intrapersonal', 'Naturalist']
-X = df[features]
-y = df['Job profession']
+
+# Ensure the feature columns are numeric, and handle any non-numeric values by filling with 0
+df[features] = df[features].apply(pd.to_numeric, errors='coerce').fillna(0)
+
+X = df[features]  # Feature set
+y = df['Job profession']  # Target variable
 
 # Label encode the target variable (Job Profession)
 le = LabelEncoder()
