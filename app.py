@@ -1,23 +1,26 @@
 import streamlit as st
 import numpy as np
+import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder
-import pandas as pd
 
-# Sample data for demonstration purposes
-data = {'Skills': ['Linguistic', 'Musical', 'Logical-Mathematical'],
-        'Job Profession': ['Writer', 'Musician', 'Scientist']}
-df = pd.DataFrame(data)
+# Load the dataset from the uploaded Excel file
+df = pd.read_excel('career_data.xlsx')  # Updated with the new file name
 
-# Features and target
-X = df['Skills'].values.reshape(-1, 1)
-y = df['Job Profession']
+# Clean the dataset by removing newline characters from 'Job profession'
+df['Job profession'] = df['Job profession'].str.replace('\n', '')
 
-# Label encode the target variable
+# Select relevant feature columns and the target column
+features = ['Linguistic', 'Musical', 'Bodily', 'Logical - Mathematical', 
+            'Spatial-Visualization', 'Interpersonal', 'Intrapersonal', 'Naturalist']
+X = df[features]
+y = df['Job profession']
+
+# Label encode the target variable (Job Profession)
 le = LabelEncoder()
 y_encoded = le.fit_transform(y)
 
-# Train a simple Logistic Regression model
+# Train the Logistic Regression model
 model = LogisticRegression()
 model.fit(X, y_encoded)
 
@@ -25,13 +28,17 @@ model.fit(X, y_encoded)
 st.title("Career Path Guidance AI")
 st.write("This app will suggest a career path based on your skills!")
 
-# Get user input
-user_input = st.text_input("Enter your top skill (e.g., Linguistic, Musical, Logical-Mathematical):")
+# Get user input for the different skills
+user_input = {}
+for feature in features:
+    user_input[feature] = st.slider(f"Rate your skill in {feature}:", 0, 20, 10)
+
+# Convert user input into a DataFrame
+user_input_df = pd.DataFrame([user_input])
 
 # Process input and predict career path
-if user_input:
-    user_input_array = np.array([user_input]).reshape(-1, 1)
-    prediction = model.predict(user_input_array)
+if st.button('Predict Career Path'):
+    prediction = model.predict(user_input_df)
     predicted_job = le.inverse_transform(prediction)
 
-    st.write(f"Based on your input, a suitable career path for you might be: {predicted_job[0]}")
+    st.write(f"Based on your skills, a suitable career path for you might be: {predicted_job[0]}")
